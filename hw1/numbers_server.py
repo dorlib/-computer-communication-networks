@@ -100,6 +100,14 @@ def validate_command(command, parts):
     return len(parts) < 2
 
 
+def split_expression(expression):
+    # Replace operators with space-operator-space
+    for op in ['*', '+', '-', '/', '(', ')', '^']:
+        expression = expression.replace(op, f' {op} ')
+    # Split the expression by spaces
+    return expression.split()
+
+
 def handel_command(client_socket, command):
     """handle a command"""
     parts = command.split(':')
@@ -117,7 +125,7 @@ def handel_command(client_socket, command):
         print(numbers)
         response = find_max(numbers)
     elif cmd == 'calculate':
-        x, op, y = args.split()
+        x, op, y = split_expression(args)
         response = calculate(x, y, op)
     else:
         response = "error: unrecognized command"
