@@ -69,6 +69,8 @@ def tcp_client():
                 break
             # Receive and print the server's response
             response = client_socket.recv(1024)
+            if response == b"error: unrecognized command" or response == b"error: invalid command format":
+                break
             print(f"{response.decode()}")
 
 
