@@ -48,12 +48,12 @@ def tcp_client():
             password = input("Password: ")
 
             # Send the username and password to the server
-            client_socket.send(f"{username}\n".encode())
-            client_socket.send(f"{password}\n".encode())
+            client_socket.send((username + "\n").encode())
+            client_socket.send((password + "\n").encode())
 
             # Receive the authentication result from the server
             response = client_socket.recv(1024).decode()
-            print(response, end='')  # Print the response from the server
+            print (response)  # Print the response from the server
 
             # If the login is unsuccessful, prompt for retry
             if "Failed to login" in response:
@@ -71,7 +71,7 @@ def tcp_client():
             response = client_socket.recv(1024)
             if response == b"error: unrecognized command" or response == b"error: invalid command format":
                 break
-            print(f"{response.decode()}")
+            print(response.decode())
 
 
 # Run the client
