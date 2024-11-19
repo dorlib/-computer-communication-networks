@@ -71,7 +71,16 @@ def find_max(numbers):
     """find the maximum between the numbers"""
     if len(numbers) == 0:
         return None
+
+    if isinstance(len(numbers), int) and abs(len(numbers)) > 2 ** 31 - 1:
+        return "error: result is too big"
+
+    for number in numbers:
+        if isinstance(number, int) and abs(number) > 2 ** 31 - 1:
+            return "error: result is too big"
     max_number = max(numbers)
+
+
     return f"the maximum is {max_number}"
 
 
@@ -85,6 +94,8 @@ def quit_program(client_socket):
 def find_factors(number):
     """find the factors of a given number"""
     x = int(number)
+    if isinstance(x, int) and abs(x) > 2 ** 31 - 1:
+        return "error: result is too big"
     factors = []
     for i in range(2, int(math.sqrt(x)) + 1):
         while x % i == 0:
@@ -108,12 +119,15 @@ def split_expression(expression):
     return expression.split()
 
 
-def handel_command(client_socket, command):
+def handle_command(client_socket, command):
     """handle a command"""
+    quit_flag = 0
+    response = ""
     parts = command.split(':')
     if validate_command(command, parts):
         client_socket.send(b"error: invalid command format")
-        return
+        quit_flag = 1
+        return quit_flag
 
     cmd, args = parts[0], parts[1].strip()
     if cmd == 'quit':
@@ -129,8 +143,9 @@ def handel_command(client_socket, command):
         response = calculate(x, y, op)
     else:
         response = "error: unrecognized command"
-
+        quit_flag = 1
     client_socket.send(f"{response}".encode())
+    return quit_flag
 
 
 def main():
@@ -176,7 +191,9 @@ def main():
                             del client_sockets[sock]
                             sock.send(b"Goodbye!\n")
                         else:
-                            handel_command(sock, command)
+                            quit_flag = handle_command(sock, command)
+                            if quit_flag: # disconnect user
+                                 del client_sockets[sock]
                 except ConnectionResetError:
                     print("Connection closed by client.")
                     del client_sockets[sock]
