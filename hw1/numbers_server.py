@@ -92,18 +92,23 @@ def quit_program(client_socket):
 
 
 def find_factors(number):
-    """find the factors of a given number"""
+    """Find the distinct prime factors of a given number."""
     x = int(number)
+    
     if isinstance(x, int) and abs(x) > 2 ** 31 - 1:
         return "error: result is too big"
-    factors = []
+    
+    factors = set()  # Use a set to store distinct factors
     for i in range(2, int(math.sqrt(x)) + 1):
         while x % i == 0:
-            factors.append(i)
+            factors.add(i)  # Add the factor to the set (automatically handles duplicates)
             x //= i
+    
     if x > 1:
-        factors.append(x)
-    return f"the prime factors of {number} are: {', '.join(map(str, factors))}"
+        factors.add(x)  # Add the remaining prime factor if x > 1
+
+    # Return the distinct prime factors as a comma-separated string
+    return f"The distinct prime factors of {number} are: {', '.join(map(str, sorted(factors)))}"
 
 
 def validate_command(command, parts):
