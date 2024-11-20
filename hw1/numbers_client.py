@@ -49,9 +49,8 @@ def tcp_client():
             username = input("User: ")
             password = input("Password: ")
 
-            # Send the username and password to the server
-            client_socket.send((username + "\n").encode())
-            client_socket.send((password + "\n").encode())
+            credentials = f"{username}:{password}\n"
+            client_socket.send(credentials.encode())
 
             # Receive the authentication result from the server
             response = client_socket.recv(1024).decode()
