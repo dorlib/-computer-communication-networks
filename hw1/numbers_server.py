@@ -40,9 +40,9 @@ def authenticate(client_socket, users):
             username, password = credentials.split(":", 1)
             # Authenticate the user
             if username in users and password == users[username]:
-                client_socket.send(f"Hi {username}, good to see you.\n".encode())
+                client_socket.send(f"Hi {username}, good to see you.".encode())
                 return username
-        client_socket.send(b"Failed to login. Please try again.\n")
+        client_socket.send(b"Failed to login. Please try again.")
 
 
 
