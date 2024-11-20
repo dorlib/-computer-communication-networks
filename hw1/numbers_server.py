@@ -32,23 +32,18 @@ def fetch_users(path):
 
 
 def authenticate(client_socket, users):
+    """Authenticate a client."""
     while True:
-        try:
-            username = client_socket.recv(1024).decode().strip()
-            print(f"Received username: {username}")
-            
-            password = client_socket.recv(1024).decode().strip()
-            print(f"Received password: {password}")
-            
+        # Wait for credentials in 'username:password' format
+        credentials = client_socket.recv(1024).decode().strip()
+        if ":" in credentials:
+            username, password = credentials.split(":", 1)
+            # Authenticate the user
             if username in users and password == users[username]:
                 client_socket.send(f"Hi {username}, good to see you.\n".encode())
                 return username
-            else:
-                client_socket.send(b"Failed to login. Please try again.\n")
-        except Exception as e:
-            print(f"Error during authentication: {e}")
-            client_socket.close()
-            break
+        client_socket.send(b"Failed to login. Please try again.\n")
+
 
 
 
