@@ -45,7 +45,7 @@ def authenticate(client_socket, users):
 
 
 def calculate(x, y, op):
-    """return the result of x op y"""
+    """Return the result of x op y"""
     try:
         x, y = int(x), int(y)
         if op == "/":
@@ -58,13 +58,24 @@ def calculate(x, y, op):
             result = x ** y
         elif op == "-":
             result = x - y
+        else:
+            return "error: unsupported operation"
+        
+        # Check if the result is an integer
         if isinstance(result, int) and abs(result) > 2 ** 31 - 1:
             return "error: result is too big"
+        
+        # Format the result
+        if isinstance(result, float):
+            result = f"{result:.2f}"  # Format to 2 decimal places
+
         return f"response: {result}"
     except OverflowError:
         return "error: result is too big"
     except ValueError:
         return "error: invalid input"
+    except ZeroDivisionError:
+        return "error: division by zero"
 
 
 def find_max(numbers):
