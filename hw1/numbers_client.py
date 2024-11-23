@@ -46,8 +46,8 @@ def tcp_client():
         # Login loop
         while True:
             # Prompt the user for username and password
-            username = input("User: ")
-            password = input("Password: ")
+            username = input("")
+            password = input("")
 
             credentials = f"{username}:{password}\n"
             client_socket.send(credentials.encode())
