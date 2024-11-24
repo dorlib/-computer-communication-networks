@@ -10,6 +10,13 @@ DEFAULT_PROT = 1337
 HOST = 'localhost'
 
 
+def quit_program(client_socket):
+    """Quit the program."""
+    client_socket.send(b"Goodbye.\n")
+    client_socket.close()
+    return 'QUIT'
+
+
 def fetch_users(path):
     """ Fetches users from a file and returns dictionary of user names and their passwords
     :parameter
@@ -138,8 +145,8 @@ def split_expression(expression):
     return expression.split()
 
 
-def handle_command(client_socket, command):
-    """handle a command"""
+def handle_command(client_socket, command, client_sockets):
+    """Handle a command."""
     quit_flag = 0
     response = ""
     parts = command.split(':')
@@ -151,6 +158,7 @@ def handle_command(client_socket, command):
     cmd, args = parts[0], parts[1].strip()
     if cmd == 'quit':
         quit_program(client_socket)
+        quit_flag = 1
     elif cmd == 'factors':
         response = find_factors(args)
     elif cmd == 'max':
@@ -163,9 +171,9 @@ def handle_command(client_socket, command):
     else:
         response = "error: unrecognized command"
         quit_flag = 1
-    client_socket.send(f"{response}".encode())
+    if not quit_flag:  # Only send response if not quitting
+        client_socket.send(f"{response}".encode())
     return quit_flag
-
 
 def main():
     if len(sys.argv) < 2:
@@ -207,15 +215,22 @@ def main():
                     command = sock.recv(1024).decode().strip()
                     if command:
                         if command == 'quit':
-                            del client_sockets[sock]
+                            del client_sockets[sock]  # Keep this line as it was
                             sock.send(b"Goodbye!\n")
+                            sock.close()
                         else:
-                            quit_flag = handle_command(sock, command)
-                            if quit_flag: # disconnect user
-                                 del client_sockets[sock]
+                            quit_flag = handle_command(sock, command, client_sockets)
+                            if quit_flag:  # Disconnect user
+                                del client_sockets[sock]
+                                sock.close()
                 except ConnectionResetError:
                     print("Connection closed by client.")
                     del client_sockets[sock]
+                    sock.close()
+                except BrokenPipeError:
+                    print("Broken pipe: Client disconnected unexpectedly.")
+                    del client_sockets[sock]
+                    sock.close()
 
 
 if __name__ == "__main__":
