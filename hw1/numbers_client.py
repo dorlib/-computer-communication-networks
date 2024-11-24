@@ -5,7 +5,7 @@ import sys
 
 DEFAULT_PORT = 1337
 DEFAULT_HOST = "localhost"
-autneticated = False
+authenticated = False
 
 
 def validate_auth_creds(cred, field):
@@ -59,6 +59,8 @@ def tcp_client():
 
         print("Welcome! Please log in")
 
+        authenticated = False
+
         # Login loop
         while True:
             # Prompt the user for username and password
@@ -83,12 +85,12 @@ def tcp_client():
             if "Failed to login" in response:
                 continue
             else:
-                autneticated = True
+                authenticated = True
                 break  # Authentication successful, exit loop
 
         # After successful login, move to command loop
         while True:
-            if not autneticated:
+            if not authenticated:
                 break
             command = input()
             client_socket.send(command.encode())
