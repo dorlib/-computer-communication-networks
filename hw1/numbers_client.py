@@ -9,8 +9,8 @@ DEFAULT_HOST = "localhost"
 def validate_auth_creds(cred, field):
     parts = cred.split(":")
     if len(parts) == 2:  # Ensure there's exactly one colon
-        key, value = parts[0].strip().lower(), parts[1].strip()
-        if key == field:
+        key, value = parts[0].strip(), parts[1].strip()
+        if key.lower() == field:
             return key
         else:
             return None
