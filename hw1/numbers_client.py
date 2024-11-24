@@ -6,6 +6,17 @@ import sys
 DEFAULT_PORT = 1337
 DEFAULT_HOST = "localhost"
 
+def validate_auth_creds(cred, field):
+    parts = cred.split(":")
+    if len(parts) == 2:  # Ensure there's exactly one colon
+        key, value = parts[0].strip().lower(), parts[1].strip()
+        if key == field:
+            return key
+        else:
+            return None
+    else:
+        return None
+
 def parse_arguments():
     """
     Parses and validates command-line arguments for hostname and port.
@@ -47,9 +58,16 @@ def tcp_client():
         while True:
             # Prompt the user for username and password
             username = input("")
+            name = validate_auth_creds(username, "user")
+            if name == None:
+                sys.exit(1)
+            
             password = input("")
+            password = validate_auth_creds(password, "password")
+            if password == None:
+                sys.exit(1)
 
-            credentials = f"{username}:{password}\n"
+            credentials = f"{name}:{password}\n"
             client_socket.send(credentials.encode())
 
             # Receive the authentication result from the server
