@@ -41,15 +41,28 @@ def fetch_users(path):
 def authenticate(client_socket, users):
     """Authenticate a client."""
     while True:
-        # Wait for credentials in 'username:password' format
-        credentials = client_socket.recv(1024).decode().strip()
-        if ":" in credentials:
-            username, password = credentials.split(":", 1)
-            # Authenticate the user
-            if username in users and password == users[username]:
-                client_socket.send(f"Hi {username}, good to see you.".encode())
-                return username
-        client_socket.send(b"Failed to login. Please try again.")
+        try:
+            # Wait for credentials in 'username:password' format
+            credentials = client_socket.recv(1024).decode().strip()
+            if ":" in credentials:
+                username, password = credentials.split(":", 1)
+                # Authenticate the user
+                if username in users and password == users[username]:
+                    # Check if socket is still valid before sending
+                    if client_socket.fileno() != -1:  # Socket is valid
+                        client_socket.send(f"Hi {username}, good to see you.".encode())
+                    return username
+
+            # Check if socket is still valid before sending failure message
+            if client_socket.fileno() != -1:  # Socket is valid
+                client_socket.send(b"Failed to login. Please try again.")
+        except BrokenPipeError:
+            print("Broken pipe: Client disconnected during authentication.")
+            return None
+        except ConnectionResetError:
+            print("Connection reset by client during authentication.")
+            return None
+
 
 
 
