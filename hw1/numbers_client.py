@@ -5,6 +5,8 @@ import sys
 
 DEFAULT_PORT = 1337
 DEFAULT_HOST = "localhost"
+autneticated = False
+
 
 def validate_auth_creds(cred, field):
     parts = cred.split(":")
@@ -29,7 +31,7 @@ def parse_arguments():
         # Only hostname is provided: use default port
         if sys.argv[1].isdigit():
             print("Error: Cannot provide a port without a hostname.")
-            sys.exit(1)
+            return None
         return sys.argv[1], DEFAULT_PORT
     elif len(sys.argv) == 3:
         # Both hostname and port are provided: validate port
@@ -38,15 +40,18 @@ def parse_arguments():
             return sys.argv[1], port
         except ValueError:
             print("Error: Port must be an integer.")
-            sys.exit(1)
+            return None
     else:
         print("Usage: numbers_client.py [hostname [port]]")
-        sys.exit(1)
+        return None
 
 def tcp_client():
     """Creates a TCP client"""
     # Retrieve and validate hostname and port
-    server_address, server_port = parse_arguments()
+    result = parse_arguments()
+    if result is None:
+        return  # Exit gracefully
+    server_address, server_port = result
     # Create a TCP socket
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
         # Connect to the server
@@ -60,12 +65,12 @@ def tcp_client():
             username = input("")
             name = validate_auth_creds(username, "user")
             if name == None:
-                sys.exit(1)
+                break
             
             password = input("")
             password = validate_auth_creds(password, "password")
             if password == None:
-                sys.exit(1)
+                break
 
             credentials = f"{name}:{password}\n"
             client_socket.send(credentials.encode())
@@ -78,10 +83,13 @@ def tcp_client():
             if "Failed to login" in response:
                 continue
             else:
+                autneticated = True
                 break  # Authentication successful, exit loop
 
         # After successful login, move to command loop
         while True:
+            if not autneticated:
+                break
             command = input()
             client_socket.send(command.encode())
             if command.lower() == "quit":
