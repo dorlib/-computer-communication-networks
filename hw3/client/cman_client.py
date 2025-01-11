@@ -54,8 +54,9 @@ def set_points(bytes_list):
         if (byte ==0):
             bit_list.extend([0,0,0,0,0,0,0,0])
         else: 
-            binary_value = [int(bit) for bit in list(bin(byte)[2:])]
+            binary_value = [int(bit) for bit in list(bin(byte)[2:].zfill(8))]
             bit_list.extend(binary_value)            
+    print(bit_list)
     # Convert the byte string into a bit string
     #print("bit_list", bit_list)
     points_list =  sorted(points.keys(), key=lambda x: (x[0], x[1]))
