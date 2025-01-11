@@ -208,8 +208,9 @@ class Game():
 			print("player can move new coords are", self.cur_coords[player-1])
 
 			if player == Player.CMAN and tuple(next_coords) in self.points.keys():
-				self.score += self.points[tuple(next_coords)]
 				self.points[tuple(next_coords)] = 1
+				self.score += self.points[tuple(next_coords)]
+				
 				if self.score >= WIN_SCORE:
 					self.declare_winner(Player.CMAN)
 			if (player == Player.CMAN and next_coords in self.cur_coords[1]) or (player != Player.CMAN and next_coords == self.cur_coords[0]):

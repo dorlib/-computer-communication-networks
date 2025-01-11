@@ -108,6 +108,7 @@ def move_player(sock, player_address, movement_message):
     
 def quit_game(sock, player_address):
     # If the opcode is "quit", handle the quit message asynchronously
+    global game_on
     print(f"Disconnected {player_address}")
     players.remove(player_address)  # Remove player from the list
     if game.players[Player.CMAN] == player_address:
@@ -153,6 +154,7 @@ def play_game(sock, player_address):
        
         
 def wait_for_players(sock):
+    global game_on
     players = []
     game_on = 0
     game.players[Player.CMAN] = 0
@@ -172,6 +174,7 @@ def wait_for_players(sock):
             continue
         # Game-related actions (synchronous)
         if game.players[Player.CMAN] and game.players[Player.SPIRIT]:
+            game_on = 1
             update_game( sock, game.players[Player.CMAN], 1)  # Send movement approval to CMAN
             update_game( sock, game.players[Player.SPIRIT], 1)  # Send movement approval to SPIRIT
             play_game(sock, player_address)  # Start the game

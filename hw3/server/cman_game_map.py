@@ -52,7 +52,7 @@ def update_map(prev_c_pos, prev_s_pos, new_c_pos, new_s_pos, points,
             rows[prev_c_pos[0]][prev_c_pos[1]] = FREE_CHAR
 
         if prev_s_pos[0] >= 0:  # Clear previous Spirit position
-            rows[prev_s_pos[0]][prev_s_pos[1]] = overwritten_spot
+            rows[prev_s_pos[0]][prev_s_pos[1]] = FREE_CHAR
 
         # Place Cman at new position
         rows[new_c_pos[0]][new_c_pos[1]] = CMAN_CHAR
@@ -65,7 +65,7 @@ def update_map(prev_c_pos, prev_s_pos, new_c_pos, new_s_pos, points,
         # Clear the console and display the updated map with stats
         for row in rows:
             rendered_row = ''.join(symbols.get(char, char) for char in row)
-            print(rendered_row)
+            print(rendered_row) 
 
     # Print stats
     print(f"\nPoints Collected: {collected_points}")
