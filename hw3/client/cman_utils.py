@@ -41,10 +41,10 @@ messages = {
         },
         b"\x8F": {
             "OPCODE": b"\x8F",
-            "WINNER": [b"\x00", b"\x00"],
-            "S_SCORE": [b"\x00", b"\x00"],
+            "WINNER": b"\x00", 
+            "S_SCORE": b"\x00",
             "C_SCORE": b"\x00",
-            "format_string": "B2B2BB"
+            "format_string": "BBBB"
             #"name": "end"
         },
         b"\xFF": {

@@ -68,17 +68,20 @@ def set_points(bytes_list):
 def display_winner(update_message):
     
         print("\033[H\033[J", end="")
+        print(update_message)
+        
         winner = player_roles[update_message["WINNER"]]
         print(f"winner is {winner}!")
-        points = set_points(update_message["COLLECTED"])
-        num_points = 40- sum(value == 1 for value in points.values())
-        print(f"Collected: {num_points} points")
+        num_points = update_message["C_SCORE"]
+        num_catch = update_message["S_SCORE"]
+        print(f"Cman Collected: {num_points} points")
+        print(f"Spirit catched Cman: {num_points} times")
         
 
 def display_game(update_message):
         # Clear the screen before displaying the updated game state
         print("\033[H\033[J", end="")
-        
+        print(update_message)
         global num_points, attempts, lives, overwritten_spot
         global prev_cman_coords, prev_spirit_coords,rows  # Declare as global
         attempts = update_message["ATTEMPTS"]
@@ -111,13 +114,15 @@ def update_game(sock, server_address):
         update_message,server =sock.recvfrom(4096)
     
     unpacked_update_message= unpack_message(update_message)
+    
     if unpacked_update_message["OPCODE"] == name_to_opcode["update_state"]:
         display_game(unpacked_update_message)
     if unpacked_update_message["OPCODE"] == name_to_opcode["end"]:
-        display_winner(update_message)
+        
+        display_winner(unpacked_update_message)
         
         time.sleep(10)
-        quit()
+        quit(sock, server_address)
         
 
 def start_game(sock, server_address):

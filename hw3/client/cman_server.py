@@ -56,24 +56,25 @@ def join_game(sock, player_address, join_message):
                 return False
             return True
 
-def end_game(sock, player ):
-    if game.winner == player:
-        print(f"{player_roles[player]} won the game")
-        messages[name_to_opcode["end"]]["WINNER"] = player
-        messages[name_to_opcode["end"]]["S_SCORE"] = game.get_current_players_coords[Player.SPIRIT-1] # get coordinates of spirit
-        messages[name_to_opcode["end"]]["C_SCORE"] = game.get_current_players_coords[Player.CMAN-1] # get coordinates of cman
-                
-        for client in players: # send the winning message to all
-                sock.sendto(pack_message( messages[name_to_opcode["end"]]), client)
-                
-        # initialize parameters for the new game
-        messages[name_to_opcode["end"]]["WINNER"] = b'\x00'
-        messages[name_to_opcode["end"]]["S_SCORE"] = [b"\xFF", b"\xFF"] # get coordinates of spirit
-        messages[name_to_opcode["end"]]["C_SCORE"] = [b"\xFF", b"\xFF"] # get coordinates of cman
+def end_game(sock ):
+
+    print(f"{player_roles[game.winner]} won the game")
+    messages[name_to_opcode["end"]]["WINNER"] = int(game.winner)
+    messages[name_to_opcode["end"]]["S_SCORE"] =MAX_ATTEMPTS - game.lives 
+    messages[name_to_opcode["end"]]["C_SCORE"] = game.score # get coordinates of cman
         
+    for client in players: # send the winning message to all
+        sock.sendto(pack_message( name_to_opcode["end"]), client)
+        print("sent message", messages[name_to_opcode["end"]])
+            
+    # initialize parameters for the new game
+    messages[name_to_opcode["end"]]["WINNER"] = b'\x00'
+    messages[name_to_opcode["end"]]["S_SCORE"] = [b"\xFF", b"\xFF"] # get coordinates of spirit
+    messages[name_to_opcode["end"]]["C_SCORE"] = [b"\xFF", b"\xFF"] # get coordinates of cman
+    
         
-        return True
-    return False
+    return True
+
 
 def update_game(sock, player_address, can_move = 1):
     if not can_move: 
@@ -145,20 +146,27 @@ def play_game(sock, player_address):
                 
             if unpacked_message["OPCODE"] == name_to_opcode["quit"]:
                 no_error = quit_game(s, player_address) 
-        if cman_moved or spirit_moved:
+        if (cman_moved or spirit_moved) and game.state==State.PLAY:
             cman_moved = 0
             spirit_moved = 0       
             for client in players:
                 update_game(sock, client,can_move)
+        if game.state == State.WIN:
+            print("sending end game message")
+            end_game(sock )
+            break
+    wait_for_players(sock)
                 
        
         
 def wait_for_players(sock):
+    
     global game_on
     players = []
     game_on = 0
     game.players[Player.CMAN] = 0
     game.players[Player.SPIRIT] = 0
+    print("waiting for new players")
     while True:
         # read_sockets, _, _ = select.select([sock], [], [])
         # sock = read_sockets[]
