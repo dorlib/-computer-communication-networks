@@ -114,14 +114,12 @@ def quit_game(sock, player_address):
         game.players[Player.CMAN] = 0
         if game_on:
            game.winner == Player.SPIRIT
-           game.declare_winner(Player.CMAN)
-           game_on = 0
+           game.declare_winner(Player.SPIRIT)
     if game.players[Player.SPIRIT] == player_address:
         game.players[Player.SPIRIT] = 0
         if game_on:
            game.winner == Player.CMAN    
            game.declare_winner(Player.CMAN)
-           game_on = 0
         
     return False
     
@@ -132,7 +130,9 @@ def play_game(sock, player_address):
     no_error = True
     can_move = False
     while True: # game on loop 
-        read_sockets, _, _ = select.select([sock], [], [],0.1)        
+        read_sockets, _, _ = select.select([sock], [], [],0.1)
+
+        
         for s in read_sockets:
             message, player_address = s.recvfrom(4096)  # Accept message from a player
             unpacked_message = unpack_message(message)    

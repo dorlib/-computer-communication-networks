@@ -6,22 +6,22 @@ from cman_game_map import *
 import os
 import sys
 import select 
-
-map_path="map.txt"
-game = Game(map_path)
-points = game.points # initial value of points
 attempts =0 
 lives = 0
 num_points = 0
+map_path="map.txt"
+game = Game(map_path)
+points = game.points # initial value of points
+
 board_width = game.board_dims[0]
 board_height = game.board_dims[1]
 prev_cman_coords = [-1,-1]
 prev_spirit_coords = [-1,-1]
-move_keys = ['w', 'a', 's', 'd']
-quit_key = ['q']
-rows= None
 overwritten_spot = 'F'
 
+move_keys = ['j', 'i', 'k', 'l']
+quit_key = ['q']
+rows= None
 player_roles= { 
     Player.SPIRIT: "spirit", 
     Player.CMAN: "Cman", 
@@ -31,11 +31,13 @@ player_roles= {
 
 
 key_to_direction = {
-    'w': Direction.UP,
-    's': Direction.DOWN,
-    'a': Direction.LEFT, 
-    'd': Direction.RIGHT
+    'i': Direction.UP,
+    'k': Direction.DOWN,
+    'j': Direction.LEFT, 
+    'l': Direction.RIGHT
 }
+
+
 
 def quit_condition():
     global quit_key
@@ -47,7 +49,6 @@ def set_points(bytes_list):
     """
     global board_width, board_height, points
     value = 0
-    print(bytes_list)
     bit_list = [] 
     for i, byte in enumerate(bytes_list):
         
@@ -57,27 +58,23 @@ def set_points(bytes_list):
             binary_value = [int(bit) for bit in list(bin(byte)[2:])]
             bit_list.extend(binary_value)            
     # Convert the byte string into a bit string
-    #print("bit_list", bit_list)
     points_list =  sorted(points.keys(), key=lambda x: (x[0], x[1]))
-    #print("point_list", points_list)
     # Rebuild the points dictionary
     points = {point: bit for point, bit in zip(points_list, bit_list)}
-    #print("points", points)
     return points
 def display_winner(update_message):
-    
         print("\033[H\033[J", end="")
         winner = player_roles[update_message["WINNER"]]
         print(f"winner is {winner}!")
         points = set_points(update_message["COLLECTED"])
+        
         num_points = 40- sum(value == 1 for value in points.values())
         print(f"Collected: {num_points} points")
         
 
+
 def display_game(update_message):
-        # Clear the screen before displaying the updated game state
         print("\033[H\033[J", end="")
-        
         global num_points, attempts, lives, overwritten_spot
         global prev_cman_coords, prev_spirit_coords,rows  # Declare as global
         attempts = update_message["ATTEMPTS"]
@@ -86,6 +83,7 @@ def display_game(update_message):
         
         new_cman_coords = update_message["C_COORDS"]
         new_spirit_coords = update_message["S_COORDS"]
+
 
         #update_map (prev_cman_coords, prev_spirit_coords, new_cman_coords, new_spirit_coords,points,  map_path)
         
@@ -144,8 +142,8 @@ def main(role, addr, port):
     server_address = (addr, port)
     # Send the chosen role to the server (you can use it for your message content)
     # Create UDP socket
+    
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-  
     # Send message to server
     messages[name_to_opcode['join']]['ROLE'] = role 
     join_message = pack_message(name_to_opcode['join'])

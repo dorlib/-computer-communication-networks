@@ -15,65 +15,79 @@ def load_map(file_path="map.txt"):
 def clear_map(file_path="map.txt"):
     global content
     with open('output.txt', 'w') as map:
-        map.write(content)
-
-def update_map(prev_c_pos, prev_s_pos, new_c_pos, new_s_pos, points, file_path="map.txt"):
-
-    try:
-        with open(file_path, 'r') as file:         # Read the map from the file
-            rows = file.read().strip().split('\n')
-
-        rows = [list(row) for row in rows]  # Convert each row into a list of characters
-
-        # Place Cman 
-        rows[new_c_pos[0]][new_c_pos[1]] = CMAN_CHAR
-        if prev_c_pos[0]>0: #handle first value 
-            rows[prev_c_pos[0]][prev_c_pos[1]] = FREE_CHAR
-        # Place Spirit
-        print(prev_s_pos, new_s_pos)
-        rows[new_s_pos[0]][new_s_pos[1]] = SPIRIT_CHAR
-        if prev_c_pos[0]>0: #handle first value 
-            rows[prev_s_pos[0]][prev_s_pos[1]] = FREE_CHAR
-        # Place points (P) at the locations specified in the points dictionary
-        for (i, j), value in points.items():
-            if value == 0:
-                rows[i][j] = FREE_CHAR
-            else:
-                rows[i][j] = POINT_CHAR
-
-        # Convert rows back to strings
-        rows = [''.join(row) for row in rows]
-
-        # Write the updated map back to the file
-        with open(file_path, 'w') as file:
-            file.write('\n'.join(rows))
-        
-    except FileNotFoundError:
-        print(f"Error: The file '{file_path}' was not found.")
-
-
-def print_map(file_path = "map.txt"):
+        map.write(content)# Define character constants
+def update_map(prev_c_pos, prev_s_pos, new_c_pos, new_s_pos, points, 
+                        rows=None, file_path="map.txt", collected_points=0, attempts=0, lives =0, overwritten_spot ='F'):
     # Define character to symbol mapping
     symbols = {
-        'W': '🟫',  # Wall
-        'F': '🟦',  # Empty floor
-        'C': '😊',  # Player 1 (smiley face)
-        'S': '👻',  # Player 2 (cool face)
-        'P': '🟩',  # Power-up or special object (optional)
+        WALL_CHAR: '🟫',
+        FREE_CHAR: '🟦',
+        CMAN_CHAR: '😊',
+        SPIRIT_CHAR: '👻',
+        POINT_CHAR: '🟩',
     }
 
-    try:
-        # Read the map from the file
-        with open(file_path, 'r') as file:
-            rows = file.read().strip().split('\n')
+    if rows is None:
+        # First-time initialization: read the map and print it fully
+        try:
+            with open(file_path, 'r') as file:
+                rows = [list(row) for row in file.read().strip().split('\n')]
 
-        # Render each row
+            # Print the initial map
+            for row in rows:
+                rendered_row = ''.join(symbols.get(char, char) for char in row)
+                print(rendered_row)
+
+        except FileNotFoundError:
+            print(f"Error: The file '{file_path}' was not found.")
+            return None, collected_points, attempts  # Return failure
+    else:
+        
+        # Update points
+
+        for (i, j), value in points.items():
+            rows[i][j] = POINT_CHAR if value == 0 else FREE_CHAR
+            
+        # Update map: modify only the changed positions
+        if prev_c_pos[0] >= 0:  # Clear previous Cman position
+            rows[prev_c_pos[0]][prev_c_pos[1]] = FREE_CHAR
+
+        if prev_s_pos[0] >= 0:  # Clear previous Spirit position
+            rows[prev_s_pos[0]][prev_s_pos[1]] = overwritten_spot
+
+        # Place Cman at new position
+        rows[new_c_pos[0]][new_c_pos[1]] = CMAN_CHAR
+        # Place Spirit at new position
+        overwirtten_spot = rows[prev_s_pos[0]][prev_s_pos[1]]
+        rows[new_s_pos[0]][new_s_pos[1]] = SPIRIT_CHAR
+        
+       
+
+        # Clear the console and display the updated map with stats
         for row in rows:
             rendered_row = ''.join(symbols.get(char, char) for char in row)
             print(rendered_row)
 
-    except FileNotFoundError:
-        print(f"Error: The file '{file_path}' was not found.")
+    # Print stats
+    print(f"\nPoints Collected: {collected_points}")
+    print(f"Attempts: {attempts}")
+    print(f"lives {lives}")
+
+    return rows, overwritten_spot  # Return updated state
+
+
+
+
+
+
+
+
+
+
+
+
+
+#overwritten_spot  # Return updated state
 
 
 
@@ -89,9 +103,10 @@ def read_map(path):
     """
     with open(path, 'r') as f:
         map_data = f.read()
-
+        
         map_chars = set(map_data)
-        assert map_chars.issubset({CMAN_CHAR, SPIRIT_CHAR, POINT_CHAR, WALL_CHAR, FREE_CHAR, '\n'}), "invalid char in map."
+  
+        assert map_chars.issubset({CMAN_CHAR, SPIRIT_CHAR, POINT_CHAR, WALL_CHAR, FREE_CHAR, '\n'}), "invalid char in map." 
         assert map_data.count(CMAN_CHAR) == 1, "Map needs to have a single C-Man starting point."
         assert map_data.count(SPIRIT_CHAR) == 1, "Map needs to have a single Spirit starting point."
         assert map_data.count(POINT_CHAR) == MAX_POINTS, f"Map needs to have {MAX_POINTS} score points."
@@ -108,6 +123,4 @@ def read_map(path):
 
         return map_data
     
-if __name__ == "__main__":
-    # Create the parser
-    print_map()
+

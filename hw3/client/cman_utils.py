@@ -82,12 +82,11 @@ def pack_message(message_name):
             values.append(value)
     # Pack the message
     packed_message = struct.pack(format_string, *values)
-
+    
     return packed_message
 
 def unpack_message(packed_message):
     # Unpack the message to get the opcode (first byte)
-    print("opcode is", packed_message[0])
     opcode = chr(packed_message[0]).encode('latin1')
     
     # Ensure the opcode exists in the messages dictionary
@@ -124,14 +123,6 @@ def unpack_message(packed_message):
     return unpacked_message
 
 
-def _flush_input():
-    try:
-        while msvcrt.kbhit():
-            msvcrt.getch()
-    except ImportError:
-        import sys, termios
-        termios.tcflush(sys.stdin, termios.TCIOFLUSH)
-import keyboard
 
 def get_pressed_keys(keys_filter=None):
     """
@@ -150,7 +141,7 @@ def get_pressed_keys(keys_filter=None):
         # Get all currently pressed keys
         pressed_keys = keyboard._pressed_events.keys()  # Internal method to get pressed keys
         pressed_keys = [key.lower() for key in pressed_keys]
-    
+    time.sleep(0.06)
     return pressed_keys
 
 
